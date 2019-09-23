@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name MSY Show Me Stock
-// @namespace Violentmonkey Scripts
+// @namespace sysKin-scripts
 // @match https://www.msy.com.au/**
 // @grant none
 // ==/UserScript==
