@@ -1,4 +1,5 @@
 // ==UserScript==
+// @description Will load stock status on the product list page - make sure to select your store from the drop down.
 // @name MSY Show Me Stock
 // @namespace sysKin-scripts
 // @match https://www.msy.com.au/**
