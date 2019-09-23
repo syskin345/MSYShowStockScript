@@ -2,6 +2,7 @@
 // @name MSY Show Me Stock
 // @namespace sysKin-scripts
 // @match https://www.msy.com.au/**
+// @match https://msy.com.au/**
 // @grant none
 // ==/UserScript==
 
