@@ -18,7 +18,7 @@ function apply(status, p) {
   let elem = $('<div class="looked-up"></div>').append($.parseHTML(status));
   if (status.indexOf('Low Stock') > 0) elem.css('color', '#660');
   if (status.indexOf('Out of Stock') > 0) {
-    p.css('opacity', '33%');
+    p.css('opacity', '0.4');
     elem.css('color', 'red');
   }
   if (status.indexOf('In Stock') > 0) elem.css('color', 'green');
