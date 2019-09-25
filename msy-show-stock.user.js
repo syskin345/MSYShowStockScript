@@ -114,6 +114,8 @@ shops.forEach(function(shop){
 
 $(document.querySelector('.product-sorting')).after(selector);
 
+selector.before($('<span>Stock lookup</span>'));
+
 selector.change(function() {
   selectedShop = selector.val();
   localStorage.setItem("shop", selectedShop)
