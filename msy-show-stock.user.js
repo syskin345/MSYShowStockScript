@@ -9,66 +9,66 @@
 
 var cache = {};
 
-var selected = localStorage.getItem("shop") || ''; 
+var selectedShop = localStorage.getItem("shop") || ''; 
 
-var elementToObserve = document.querySelector(".page-body");
-
-
-function apply(status, p) {
-  let elem = $('<div class="looked-up"></div>').append($.parseHTML(status));
-  if (status.indexOf('Low Stock') > 0) elem.css('color', '#660');
-  if (status.indexOf('Out of Stock') > 0) {
-    p.css('opacity', '0.4');
-    elem.css('color', 'red');
+function apply(stockStatus, productElement, stockStatusElement) {
+  stockStatusElement.style['font-weight'] = 'bold';
+  stockStatusElement.textContent = stockStatus;
+  if (stockStatus.indexOf('Low Stock') >= 0) stockStatusElement.style.color = '#660';
+  if (stockStatus.indexOf('Out of Stock') >= 0) {
+    productElement.style.opacity = '0.4';
+    stockStatusElement.style.color = 'red';
   }
-  if (status.indexOf('In Stock') > 0) elem.css('color', 'green');
-  p.append(elem);
+  if (stockStatus.indexOf('In Stock') >= 0) stockStatusElement.style.color = 'green';
 }
 
-function doLookup(prod) {
-  if (prod.querySelector('.looked-up')) {
+function doLookup(productElement) {
+  if (productElement.querySelector('.stock-status')) {
     return;
   }
+  let stockStatusElement = document.createElement('div');
+  stockStatusElement.className = 'stock-status';
+  productElement.appendChild(stockStatusElement);
 
-  let p = $(prod);
-  p.css('opacity', '');
+  productElement.style.opacity = '';
 
-  if (selected) {
-    let addr = p.find('a').attr('href');
+  if (selectedShop) {
+    let addr = productElement.querySelector('a').getAttribute('href');
     if (addr) {
-      let status = cache[selected+addr];
+      let status = cache[selectedShop+addr];
       if (!status) {
-        $('<div></div>').load(addr, [], function(ret) {
-          let pos = ret.indexOf(selected);
-          if (pos == -1) return;
-          let pos2 = ret.indexOf('<td', pos);
-          let pos3 = ret.indexOf('>', pos2);
-          let pos4 = ret.indexOf('</td>', pos3);
-          let status2 = ret.substring(pos3+1, pos4);
-          cache[selected+addr] = status2;
-          apply(status2, p);
+        $.get(addr, function(ret, r) {
+          if (r === 'success') {
+            let productDocument = new DOMParser().parseFromString(ret, 'text/html');
+            for (let shopNameCell of productDocument.querySelectorAll('td.spec-name')) {
+              if (shopNameCell.nextElementSibling && shopNameCell.innerText.trim() === selectedShop) {
+                let stockStatus = shopNameCell.nextElementSibling.innerText;
+                cache[selectedShop+addr] = stockStatus;
+                apply(stockStatus, productElement, stockStatusElement);
+                return;
+              }
+            }
+          }
         });
       } else {
-        apply(status, p);
+        apply(status, productElement, stockStatusElement);
       }
     }
   }
 }
 
 var observer = new MutationObserver(function(records) {
-
-  records.forEach(function(record) {
-  
+  for (let record of records) {
     for (let node of record.addedNodes) {
       if (!node.querySelectorAll) continue;
       for (let prod of node.querySelectorAll('div.product-item')) {
         doLookup(prod);
       }
     }
-  });
+  }
 });
    
-
+var elementToObserve = document.querySelector('.page-body');
 observer.observe(elementToObserve, {subtree: true, childList: true});
 
 let shops = [
@@ -106,7 +106,7 @@ let shops = [
 var selector = $('<select style="text-transform: none"><option value="">no stock lookup</option></select>');
 shops.forEach(function(shop){
   let opt = $('<option></option>').attr('value', shop).text(shop);
-  if (shop === selected) {
+  if (shop === selectedShop) {
     opt.attr('selected', 'selected');
   }
   selector.append(opt);
@@ -115,10 +115,10 @@ shops.forEach(function(shop){
 $(document.querySelector('.product-sorting')).after(selector);
 
 selector.change(function() {
-  selected = selector.val();
-  localStorage.setItem("shop", selected)
-  $('div.looked-up').detach();
+  selectedShop = selector.val();
+  localStorage.setItem("shop", selectedShop)
+  $('div.stock-status').detach();
   document.querySelectorAll("div.product-item").forEach(doLookup);
 });
 
-document.querySelectorAll("div.product-item").forEach(doLookup);
+document.querySelectorAll('.category-page div.product-item').forEach(doLookup);
