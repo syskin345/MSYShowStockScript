@@ -28,6 +28,7 @@ function doLookup(productElement) {
   }
   let stockStatusElement = document.createElement('div');
   stockStatusElement.className = 'stock-status';
+  stockStatusElement.textContent = '\xa0';
   productElement.appendChild(stockStatusElement);
 
   productElement.style.opacity = '';
