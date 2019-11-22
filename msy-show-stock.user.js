@@ -121,7 +121,7 @@ selector.change(function() {
   selectedShop = selector.val();
   localStorage.setItem("shop", selectedShop)
   $('div.stock-status').detach();
-  document.querySelectorAll("div.product-item").forEach(doLookup);
+  document.querySelectorAll('.category-page div.product-item, .search-results div.product-item').forEach(doLookup);
 });
 
-document.querySelectorAll('.category-page div.product-item').forEach(doLookup);
+document.querySelectorAll('.category-page div.product-item, .search-results div.product-item').forEach(doLookup);
