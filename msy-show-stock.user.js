@@ -84,6 +84,7 @@ let shops = [
   'QLD - Slacks Creek', 
   'SA - Adelaide CBD', 
   'SA - Holden Hill', 
+  'TAS - Glenorchy',
   'VIC - Clayton',
   'VIC - Dandenong',
   'VIC - Mitcham',
