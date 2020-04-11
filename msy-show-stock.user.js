@@ -50,7 +50,7 @@ function doLookup(productElement) {
               }
             }
             let stockStatus = 'Shop missing. Closed? :(';
-            cache[selectedShop+addr];
+            cache[selectedShop+addr] = stockStatus;
             apply(stockStatus, productElement, stockStatusElement);            
           }
         });
