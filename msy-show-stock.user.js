@@ -49,6 +49,9 @@ function doLookup(productElement) {
                 return;
               }
             }
+            let stockStatus = 'Shop missing. Closed? :(';
+            cache[selectedShop+addr];
+            apply(stockStatus, productElement, stockStatusElement);            
           }
         });
       } else {
@@ -76,32 +79,16 @@ let shops = [
   'MSY Online', 
   'ACT - Fyshwick', 
   'NSW - Auburn', 
-  'NSW - Hurstville', 
-  'NSW - Kingsford', 
-  'NSW - Mount Pritchard', 
   'NSW - Ultimo', 
   'QLD - Brendale', 
-  'QLD - Ipswich/Bundamba', 
-  'QLD - Morningside', 
   'QLD - Slacks Creek', 
-  'QLD - Varsity Lakes', 
   'SA - Adelaide CBD', 
-  'SA - Elizabeth', 
   'SA - Holden Hill', 
-  'SA - North Plympton', 
-  'SA - Port Adelaide', 
-  'TAS - Glenorchy', 
-  'VIC - Altona North/Brooklyn', 
-  'VIC - Cheltenham',
   'VIC - Clayton',
   'VIC - Dandenong',
-  'VIC - Geelong',
-  'VIC - Malvern',
   'VIC - Mitcham',
-  'VIC - North Melbourne',
   'VIC - Pascoe vale',
-  'WA - Balcatta',
-  'WA - Cannington'
+  'WA - Balcatta'
 ];
 
 var selector = $('<select style="text-transform: none"><option value="">no stock lookup</option></select>');
