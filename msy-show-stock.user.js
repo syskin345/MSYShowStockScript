@@ -2,7 +2,7 @@
 // @description Will load stock status on the product list page - make sure to select your store from the drop down.
 // @name MSY Show Me Stock
 // @namespace sysKin-scripts
-// @version 1.1.10
+// @version 1.1.11
 // @match https://www.msy.com.au/**
 // @match https://msy.com.au/**
 // @grant none
