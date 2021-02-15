@@ -2,7 +2,7 @@
 // @description Will load stock status on the product list page - make sure to select your store from the drop down.
 // @name MSY Show Me Stock
 // @namespace sysKin-scripts
-// @version 1.1.11
+// @version 1.1.12
 // @match https://www.msy.com.au/**
 // @match https://msy.com.au/**
 // @grant none
@@ -14,7 +14,7 @@ var cache = {};
 var selectedShop = localStorage.getItem("shop") || ''; 
 
 function apply(stockStatus, productElement, stockStatusElement, spinner) {
-  spinner.hide();
+  if (spinner) spinner.hide();
   stockStatusElement.style['font-weight'] = 'bold';
   stockStatusElement.textContent = stockStatus;
   if (stockStatus.indexOf('Low Stock') >= 0) stockStatusElement.style.color = '#660';
@@ -36,14 +36,13 @@ function doLookup(productElement) {
   productElement.style.opacity = '';
 
   if (selectedShop) {
-    var spinner = new Spinner();
-    stockStatusElement.appendChild(spinner.element);
-    spinner.show();
-
     let addr = productElement.querySelector('a').getAttribute('href');
     if (addr) {
       let status = cache[selectedShop+addr];
       if (!status) {
+		var spinner = new Spinner();
+		stockStatusElement.appendChild(spinner.element);
+		spinner.show();
         $.get(addr, function(ret, r) {
           if (r === 'success') {
             let productDocument = new DOMParser().parseFromString(ret, 'text/html');
@@ -61,7 +60,7 @@ function doLookup(productElement) {
           }
         });
       } else {
-        apply(status, productElement, stockStatusElement);
+        apply(status, productElement, stockStatusElement, null);
       }
     }
   }
