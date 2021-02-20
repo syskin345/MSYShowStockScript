@@ -2,7 +2,7 @@
 // @description Will load stock status on the product list page - make sure to select your store from the drop down.
 // @name MSY Show Me Stock
 // @namespace sysKin-scripts
-// @version 1.2.0
+// @version 1.2.1
 // @match https://www.msy.com.au/**
 // @match https://msy.com.au/**
 // @grant none
@@ -36,7 +36,7 @@ function doLookup(productElement) {
   productElement.style.opacity = '';
 
   if (selectedShop) {
-    let addr = productElement.querySelector('a').getAttribute('href');
+    let addr = productElement.querySelector('a').href;
     if (addr) {
       let status = cache[selectedShop+addr];
       if (!status) {
