@@ -2,7 +2,7 @@
 // @description Will load stock status on the product list page - make sure to select your store from the drop down.
 // @name MSY Show Me Stock
 // @namespace sysKin-scripts
-// @version 1.1.12
+// @version 1.2.0
 // @match https://www.msy.com.au/**
 // @match https://msy.com.au/**
 // @grant none
@@ -11,7 +11,7 @@
 
 var cache = {};
 
-var selectedShop = localStorage.getItem("shop") || ''; 
+var selectedShop = localStorage.getItem('shop') || '';
 
 function apply(stockStatus, productElement, stockStatusElement, spinner) {
   if (spinner) spinner.hide();
@@ -40,24 +40,34 @@ function doLookup(productElement) {
     if (addr) {
       let status = cache[selectedShop+addr];
       if (!status) {
-		var spinner = new Spinner();
-		stockStatusElement.appendChild(spinner.element);
-		spinner.show();
-        $.get(addr, function(ret, r) {
-          if (r === 'success') {
-            let productDocument = new DOMParser().parseFromString(ret, 'text/html');
-            for (let shopNameCell of productDocument.querySelectorAll('td.spec-name')) {
-              if (shopNameCell.nextElementSibling && shopNameCell.innerText.trim() === selectedShop) {
-                let stockStatus = shopNameCell.nextElementSibling.innerText;
-                cache[selectedShop+addr] = stockStatus;
-                apply(stockStatus, productElement, stockStatusElement, spinner);
-                return;
-              }
-            }
-            let stockStatus = 'Shop missing. Closed? :(';
-            cache[selectedShop+addr] = stockStatus;
-            apply(stockStatus, productElement, stockStatusElement, spinner);
+        var spinner = new Spinner();
+        stockStatusElement.appendChild(spinner.element);
+        spinner.show();
+        fetch(addr, {credentials: 'omit'})
+        .then(function(response) {
+          if (!response.ok) {
+            throw new Error();
           }
+          return response.text();
+        })
+        .then(function(html) {
+          return new DOMParser().parseFromString(html, 'text/html');
+        })
+        .then(function(productDocument) {
+          for (let shopNameCell of productDocument.querySelectorAll('td.spec-name')) {
+            if (shopNameCell.nextElementSibling && shopNameCell.innerText.trim() === selectedShop) {
+              let stockStatus = shopNameCell.nextElementSibling.innerText;
+              cache[selectedShop+addr] = stockStatus;
+              apply(stockStatus, productElement, stockStatusElement, spinner);
+              return;
+            }
+          }
+          let stockStatus = 'Shop missing. Closed? :(';
+          cache[selectedShop+addr] = stockStatus;
+          apply(stockStatus, productElement, stockStatusElement, spinner);
+        })
+        .catch(function(error) {
+          apply('error', productElement, stockStatusElement, spinner);
         });
       } else {
         apply(status, productElement, stockStatusElement, null);
@@ -101,23 +111,36 @@ let shops = [
   'WA - Balcatta'
 ];
 
-var selector = $('<select style="text-transform: none"><option value="">no stock lookup</option></select>');
-shops.forEach(function(shop){
-  let opt = $('<option></option>').attr('value', shop).text(shop);
+let selector = document.createElement('select');
+selector.style['text-transform'] = 'none';
+{
+  let optNone = document.createElement('option');
+  optNone.setAttribute('value', '');
+  optNone.innerText = 'no stock lookup';
+  selector.appendChild(optNone);
+}
+
+shops.forEach(function(shop) {
+  let opt = document.createElement('option');
+  opt.setAttribute('value', shop);
+  opt.innerText = shop;
   if (shop === selectedShop) {
-    opt.attr('selected', 'selected');
+    opt.setAttribute('selected', 'selected');
   }
-  selector.append(opt);
+  selector.appendChild(opt);
 }); 
 
-$(document.querySelector('.product-sorting')).after(selector);
+let label = document.createElement('span');
+label.innerText = 'Stock lookup';
 
-selector.before($('<span>Stock lookup</span>'));
+document.querySelector('.product-sorting').after(label, selector);
 
-selector.change(function() {
-  selectedShop = selector.val();
-  localStorage.setItem("shop", selectedShop)
-  $('div.stock-status').detach();
+selector.addEventListener('change', function() {
+  selectedShop = selector.value;
+  localStorage.setItem('shop', selectedShop)
+  document.querySelectorAll('div.stock-status').forEach(function(stockStatusElement) {
+    stockStatusElement.parentNode.removeChild(stockStatusElement);
+  });
   document.querySelectorAll('.category-page div.product-item, .search-results div.product-item').forEach(doLookup);
 });
 
