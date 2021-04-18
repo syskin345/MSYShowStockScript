@@ -2,7 +2,7 @@
 // @description Will load stock status on the product list page - make sure to select your store from the drop down.
 // @name MSY Show Me Stock
 // @namespace sysKin-scripts
-// @version 1.2.1
+// @version 1.3.0
 // @match https://www.msy.com.au/**
 // @match https://msy.com.au/**
 // @grant none
@@ -39,6 +39,7 @@ function doLookup(productElement) {
     let addr = productElement.querySelector('a').href;
     if (addr) {
       let status = cache[selectedShop+addr];
+      console.info(status);
       if (!status) {
         var spinner = new Spinner();
         stockStatusElement.appendChild(spinner.element);
@@ -54,20 +55,32 @@ function doLookup(productElement) {
           return new DOMParser().parseFromString(html, 'text/html');
         })
         .then(function(productDocument) {
+          let shopFound = false;
+          let tableFound = false;
           for (let shopNameCell of productDocument.querySelectorAll('td.spec-name')) {
-            if (shopNameCell.nextElementSibling && shopNameCell.innerText.trim() === selectedShop) {
+            tableFound = true;
+            if (shopNameCell.nextElementSibling) {
+              let shopName = shopNameCell.innerText.trim();
               let stockStatus = shopNameCell.nextElementSibling.innerText;
-              cache[selectedShop+addr] = stockStatus;
-              apply(stockStatus, productElement, stockStatusElement, spinner);
-              return;
+              cache[shopName+addr] = stockStatus;
+              if (shopName === selectedShop) {
+                shopFound = true;
+                apply(stockStatus, productElement, stockStatusElement, spinner);
+              }
             }
           }
-          let stockStatus = 'Shop missing. Closed? :(';
-          cache[selectedShop+addr] = stockStatus;
-          apply(stockStatus, productElement, stockStatusElement, spinner);
+          if (tableFound) {
+            if (!shopFound) {
+              let stockStatus = 'Shop missing. Closed? :(';
+              apply(stockStatus, productElement, stockStatusElement, spinner);
+            }
+          } else {
+            let stockStatus = 'Error';
+            apply(stockStatus, productElement, stockStatusElement, spinner);
+          }
         })
-        .catch(function(error) {
-          apply('error', productElement, stockStatusElement, spinner);
+        .catch(function() {
+          apply('Error', productElement, stockStatusElement, spinner);
         });
       } else {
         apply(status, productElement, stockStatusElement, null);
