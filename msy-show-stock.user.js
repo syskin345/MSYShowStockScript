@@ -9,7 +9,7 @@
 // @run-at document-idle
 // ==/UserScript==
 
-var cache = {};
+var cacheExpiry = 1*60*60*1000; // 1 hour
 
 var selectedShop = localStorage.getItem('shop') || '';
 
@@ -38,9 +38,8 @@ function doLookup(productElement) {
   if (selectedShop) {
     let addr = productElement.querySelector('a').href;
     if (addr) {
-      let status = cache[selectedShop+addr];
-      console.info(status);
-      if (!status) {
+      let status = getCache()[selectedShop+addr];
+      if (!status || status.time < Date.now() - cacheExpiry) {
         var spinner = new Spinner();
         stockStatusElement.appendChild(spinner.element);
         spinner.show();
@@ -57,12 +56,14 @@ function doLookup(productElement) {
         .then(function(productDocument) {
           let shopFound = false;
           let tableFound = false;
+          let time = Date.now();
+          let cache = getCache();
           for (let shopNameCell of productDocument.querySelectorAll('td.spec-name')) {
             tableFound = true;
             if (shopNameCell.nextElementSibling) {
               let shopName = shopNameCell.innerText.trim();
               let stockStatus = shopNameCell.nextElementSibling.innerText;
-              cache[shopName+addr] = stockStatus;
+              cache[shopName+addr] = {status: stockStatus, time: time};
               if (shopName === selectedShop) {
                 shopFound = true;
                 apply(stockStatus, productElement, stockStatusElement, spinner);
@@ -78,14 +79,23 @@ function doLookup(productElement) {
             let stockStatus = 'Error';
             apply(stockStatus, productElement, stockStatusElement, spinner);
           }
+          localStorage.setItem('cache', JSON.stringify(cache));
         })
         .catch(function() {
           apply('Error', productElement, stockStatusElement, spinner);
         });
       } else {
-        apply(status, productElement, stockStatusElement, null);
+        apply(status.status, productElement, stockStatusElement, null);
       }
     }
+  }
+}
+
+function getCache() {
+  try {
+    return JSON.parse(localStorage.getItem('cache')||'{}');
+  } catch(e) {
+    return {};
   }
 }
 
