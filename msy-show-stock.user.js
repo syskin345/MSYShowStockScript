@@ -102,6 +102,7 @@ let shops = [
   'QLD - Brendale', 
   'QLD - Slacks Creek', 
   'SA - Adelaide CBD', 
+  'SA - Elizabeth', 
   'SA - Holden Hill', 
   'TAS - Glenorchy',
   'VIC - Clayton',
